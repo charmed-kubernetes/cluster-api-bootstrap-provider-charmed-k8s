@@ -1,0 +1,31 @@
+# permissions for end users to edit jujuconfigs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: jujuconfig-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: cluster-api-bootstrap-provider-juju
+    app.kubernetes.io/part-of: cluster-api-bootstrap-provider-juju
+    app.kubernetes.io/managed-by: kustomize
+  name: jujuconfig-editor-role
+rules:
+- apiGroups:
+  - bootstrap.bootstrap.cluster.x-k8s.io
+  resources:
+  - jujuconfigs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - bootstrap.bootstrap.cluster.x-k8s.io
+  resources:
+  - jujuconfigs/status
+  verbs:
+  - get
