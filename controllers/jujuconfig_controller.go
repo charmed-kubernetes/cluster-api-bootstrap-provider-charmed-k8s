@@ -78,8 +78,7 @@ func (r *JujuConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 	if configOwner == nil {
-		log.Info("Config Owner was nil ...")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, errors.New("config owner was nil")
 	}
 	log.Info("Retrieved config owner successfully")
 
