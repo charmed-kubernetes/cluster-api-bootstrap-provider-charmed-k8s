@@ -20,7 +20,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - bootstrap.bootstrap.cluster.x-k8s.io
+  - bootstrap.cluster.x-k8s.io
   resources:
   - jujuconfigs
   verbs:
@@ -32,13 +32,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - bootstrap.bootstrap.cluster.x-k8s.io
+  - bootstrap.cluster.x-k8s.io
   resources:
   - jujuconfigs/finalizers
   verbs:
   - update
 - apiGroups:
-  - bootstrap.bootstrap.cluster.x-k8s.io
+  - bootstrap.cluster.x-k8s.io
   resources:
   - jujuconfigs/status
   verbs:

@@ -1,4 +1,4 @@
-apiVersion: bootstrap.bootstrap.cluster.x-k8s.io/v1beta1
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: JujuConfig
 metadata:
   labels:
@@ -23,12 +23,12 @@ spec:
 kind: Machine
 apiVersion: cluster.x-k8s.io/v1beta1
 metadata:
-  name: jujumachine-sample
+  name: machine-sample
   labels:
-    cluster.x-k8s.io/cluster-name: jujucluster-sample
+    cluster.x-k8s.io/cluster-name: cluster-sample
     cluster.x-k8s.io/control-plane: "false"
 spec:
-  clusterName: jujucluster-sample
+  clusterName: cluster-sample
   bootstrap:
     configRef:
       kind: JujuConfig
@@ -56,7 +56,7 @@ spec:
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
-  name: jujucluster-sample
+  name: cluster-sample
 spec:
   clusterNetwork:
     pods:
@@ -66,3 +66,60 @@ spec:
     kind: JujuCluster
     name: jujucluster-sample
 ---
+# apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+# kind: JujuMachine
+# metadata:
+#   labels:
+#     app.kubernetes.io/name: jujumachine
+#     app.kubernetes.io/instance: jujumachine-sample
+#     app.kubernetes.io/part-of: cluster-api-provider-juju
+#     app.kuberentes.io/managed-by: kustomize
+#     app.kubernetes.io/created-by: cluster-api-provider-juju
+#   name: jujumachine-sample
+# spec:
+#   # TODO(user): Add fields here
+#   foo: bar
+# ---
+# kind: Machine
+# apiVersion: cluster.x-k8s.io/v1beta1
+# metadata:
+#   name: machine-sample
+#   labels:
+#     cluster.x-k8s.io/cluster-name: cluster-sample
+#     cluster.x-k8s.io/control-plane: "false"
+# spec:
+#   clusterName: jujucluster-sample
+#   bootstrap:
+#     dataSecretName: "asdf"
+#   infrastructureRef:
+#     kind: JujuMachine
+#     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+#     name: jujumachine-sample
+# ---
+# apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+# kind: JujuCluster
+# metadata:
+#   labels:
+#     app.kubernetes.io/name: jujucluster
+#     app.kubernetes.io/instance: jujucluster-sample
+#     app.kubernetes.io/part-of: cluster-api-provider-juju
+#     app.kuberentes.io/managed-by: kustomize
+#     app.kubernetes.io/created-by: cluster-api-provider-juju
+#   name: jujucluster-sample
+# spec:
+#   # TODO(user): Add fields here
+#   foo: bar
+# ---
+# apiVersion: cluster.x-k8s.io/v1beta1
+# kind: Cluster
+# metadata:
+#   name: cluster-sample
+# spec:
+#   clusterNetwork:
+#     pods:
+#       cidrBlocks: ["192.168.0.0/16"]
+#   infrastructureRef:
+#     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+#     kind: JujuCluster
+#     name: jujucluster-sample
+# ---

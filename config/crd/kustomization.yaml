@@ -5,7 +5,7 @@ commonLabels:
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/bootstrap.bootstrap.cluster.x-k8s.io_jujuconfigs.yaml
+- bases/bootstrap.cluster.x-k8s.io_jujuconfigs.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

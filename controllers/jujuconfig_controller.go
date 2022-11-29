@@ -38,9 +38,9 @@ type JujuConfigReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=bootstrap.bootstrap.cluster.x-k8s.io,resources=jujuconfigs,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=bootstrap.bootstrap.cluster.x-k8s.io,resources=jujuconfigs/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=bootstrap.bootstrap.cluster.x-k8s.io,resources=jujuconfigs/finalizers,verbs=update
+//+kubebuilder:rbac:groups=bootstrap.cluster.x-k8s.io,resources=jujuconfigs,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=bootstrap.cluster.x-k8s.io,resources=jujuconfigs/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=bootstrap.cluster.x-k8s.io,resources=jujuconfigs/finalizers,verbs=update
 //+kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters;clusters/status;machinesets;machines;machines/status;machinepools;machinepools/status,verbs=get;list;watch
 //+kubebuilder:rbac:groups="",resources=secrets;events;configmaps,verbs=get;list;watch;create;update;patch;delete
 
@@ -78,7 +78,8 @@ func (r *JujuConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 	if configOwner == nil {
-		return ctrl.Result{}, errors.New("config owner was nil")
+		log.Info("Config owner was nil")
+		return ctrl.Result{}, nil
 	}
 	log.Info("Retrieved config owner successfully")
 
