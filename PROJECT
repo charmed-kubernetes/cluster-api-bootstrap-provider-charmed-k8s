@@ -1,4 +1,4 @@
-domain: bootstrap.cluster.x-k8s.io
+domain: cluster.x-k8s.io
 layout:
 - go.kubebuilder.io/v3
 projectName: cluster-api-bootstrap-provider-juju
@@ -8,7 +8,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: bootstrap.cluster.x-k8s.io
+  domain: cluster.x-k8s.io
   group: bootstrap
   kind: JujuConfig
   path: github.com/charmed-kubernetes/cluster-api-bootstrap-provider-juju/api/v1beta1
