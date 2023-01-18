@@ -1,4 +1,4 @@
-module github.com/charmed-kubernetes/cluster-api-bootstrap-provider-juju
+module github.com/charmed-kubernetes/cluster-api-bootstrap-provider-charmed-k8s
 
 go 1.19
 

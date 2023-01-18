@@ -1,13 +1,13 @@
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
-kind: JujuConfig
+kind: CharmedK8sConfig
 metadata:
   labels:
-    app.kubernetes.io/name: jujuconfig
-    app.kubernetes.io/instance: jujuconfig-sample
-    app.kubernetes.io/part-of: cluster-api-bootstrap-provider-juju
+    app.kubernetes.io/name: charmedk8sconfig
+    app.kubernetes.io/instance: charmedk8sconfig-sample
+    app.kubernetes.io/part-of: cluster-api-bootstrap-provider-charmed-k8s
     app.kuberentes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: cluster-api-bootstrap-provider-juju
-  name: jujuconfig-sample
+    app.kubernetes.io/created-by: cluster-api-bootstrap-provider-charmed-k8s
+  name: charmedk8sconfig-sample
 spec:
   # TODO(user): Add fields here
   foo: bar
@@ -31,9 +31,9 @@ spec:
   clusterName: cluster-sample
   bootstrap:
     configRef:
-      kind: JujuConfig
+      kind: CharmedK8sConfig
       apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
-      name: jujuconfig-sample
+      name: charmedk8sconfig-sample
   infrastructureRef:
     kind: JujuMachine
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -45,9 +45,9 @@ metadata:
   labels:
     app.kubernetes.io/name: jujucluster
     app.kubernetes.io/instance: jujucluster-sample
-    app.kubernetes.io/part-of: cluster-api-provider-juju
+    app.kubernetes.io/part-of: cluster-api-provider-charmed-k8s
     app.kuberentes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: cluster-api-provider-juju
+    app.kubernetes.io/created-by: cluster-api-provider-charmed-k8s
   name: jujucluster-sample
 spec:
   # TODO(user): Add fields here

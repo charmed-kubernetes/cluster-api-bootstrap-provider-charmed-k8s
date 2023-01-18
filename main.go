@@ -32,8 +32,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	bootstrapv1beta1 "github.com/charmed-kubernetes/cluster-api-bootstrap-provider-juju/api/v1beta1"
-	"github.com/charmed-kubernetes/cluster-api-bootstrap-provider-juju/controllers"
+	bootstrapv1beta1 "github.com/charmed-kubernetes/cluster-api-bootstrap-provider-charmed-k8s/api/v1beta1"
+	"github.com/charmed-kubernetes/cluster-api-bootstrap-provider-charmed-k8s/controllers"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -90,11 +90,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.JujuConfigReconciler{
+	if err = (&controllers.CharmedK8sConfigReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "JujuConfig")
+		setupLog.Error(err, "unable to create controller", "controller", "CharmedK8sConfig")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

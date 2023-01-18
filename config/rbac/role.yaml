@@ -22,7 +22,7 @@ rules:
 - apiGroups:
   - bootstrap.cluster.x-k8s.io
   resources:
-  - jujuconfigs
+  - charmedk8sconfigs
   verbs:
   - create
   - delete
@@ -34,13 +34,13 @@ rules:
 - apiGroups:
   - bootstrap.cluster.x-k8s.io
   resources:
-  - jujuconfigs/finalizers
+  - charmedk8sconfigs/finalizers
   verbs:
   - update
 - apiGroups:
   - bootstrap.cluster.x-k8s.io
   resources:
-  - jujuconfigs/status
+  - charmedk8sconfigs/status
   verbs:
   - get
   - patch
