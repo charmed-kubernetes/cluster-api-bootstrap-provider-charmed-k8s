@@ -42,6 +42,17 @@ spec:
             type: object
           status:
             description: CharmedK8sConfigStatus defines the observed state of CharmedK8sConfig
+            properties:
+              dataSecretName:
+                type: string
+              failureMessage:
+                type: string
+              failureReason:
+                description: Optional fields for bootstrap providers
+                type: string
+              ready:
+                description: Required fields for bootstrap providers
+                type: boolean
             type: object
         type: object
     served: true

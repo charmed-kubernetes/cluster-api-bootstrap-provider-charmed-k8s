@@ -36,6 +36,14 @@ type CharmedK8sConfigSpec struct {
 type CharmedK8sConfigStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// Required fields for bootstrap providers
+	Ready          bool   `json:"ready,omitempty"`
+	DataSecretName string `json:"dataSecretName,omitempty"`
+
+	// Optional fields for bootstrap providers
+	FailureReason  string `json:"failureReason,omitempty"`  // error string for programs
+	FailureMessage string `json:"failureMessage,omitempty"` // error string for humans
 }
 
 //+kubebuilder:object:root=true
