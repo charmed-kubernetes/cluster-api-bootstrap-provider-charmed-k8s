@@ -23,42 +23,50 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// JujuConfigSpec defines the desired state of JujuConfig
-type JujuConfigSpec struct {
+// CharmedK8sConfigSpec defines the desired state of CharmedK8sConfig
+type CharmedK8sConfigSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of JujuConfig. Edit jujuconfig_types.go to remove/update
+	// Foo is an example field of CharmedK8sConfig. Edit charmedk8sconfig_types.go to remove/update
 	Foo string `json:"foo,omitempty"`
 }
 
-// JujuConfigStatus defines the observed state of JujuConfig
-type JujuConfigStatus struct {
+// CharmedK8sConfigStatus defines the observed state of CharmedK8sConfig
+type CharmedK8sConfigStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// Required fields for bootstrap providers
+	Ready          bool   `json:"ready,omitempty"`
+	DataSecretName string `json:"dataSecretName,omitempty"`
+
+	// Optional fields for bootstrap providers
+	FailureReason  string `json:"failureReason,omitempty"`  // error string for programs
+	FailureMessage string `json:"failureMessage,omitempty"` // error string for humans
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// JujuConfig is the Schema for the jujuconfigs API
-type JujuConfig struct {
+// CharmedK8sConfig is the Schema for the charmedk8sconfigs API
+type CharmedK8sConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   JujuConfigSpec   `json:"spec,omitempty"`
-	Status JujuConfigStatus `json:"status,omitempty"`
+	Spec   CharmedK8sConfigSpec   `json:"spec,omitempty"`
+	Status CharmedK8sConfigStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// JujuConfigList contains a list of JujuConfig
-type JujuConfigList struct {
+// CharmedK8sConfigList contains a list of CharmedK8sConfig
+type CharmedK8sConfigList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []JujuConfig `json:"items"`
+	Items           []CharmedK8sConfig `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&JujuConfig{}, &JujuConfigList{})
+	SchemeBuilder.Register(&CharmedK8sConfig{}, &CharmedK8sConfigList{})
 }

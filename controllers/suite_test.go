@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	bootstrapv1beta1 "github.com/charmed-kubernetes/cluster-api-bootstrap-provider-juju/api/v1beta1"
+	bootstrapv1beta1 "github.com/charmed-kubernetes/cluster-api-bootstrap-provider-charmed-k8s/api/v1beta1"
 	//+kubebuilder:scaffold:imports
 )
 

@@ -1,20 +1,20 @@
-# permissions for end users to view jujuconfigs.
+# permissions for end users to view charmedk8sconfigs.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: clusterrole
-    app.kubernetes.io/instance: jujuconfig-viewer-role
+    app.kubernetes.io/instance: charmedk8sconfig-viewer-role
     app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: cluster-api-bootstrap-provider-juju
-    app.kubernetes.io/part-of: cluster-api-bootstrap-provider-juju
+    app.kubernetes.io/created-by: cluster-api-bootstrap-provider-charmed-k8s
+    app.kubernetes.io/part-of: cluster-api-bootstrap-provider-charmed-k8s
     app.kubernetes.io/managed-by: kustomize
-  name: jujuconfig-viewer-role
+  name: charmedk8sconfig-viewer-role
 rules:
 - apiGroups:
   - bootstrap.cluster.x-k8s.io
   resources:
-  - jujuconfigs
+  - charmedk8sconfigs
   verbs:
   - get
   - list
@@ -22,6 +22,6 @@ rules:
 - apiGroups:
   - bootstrap.cluster.x-k8s.io
   resources:
-  - jujuconfigs/status
+  - charmedk8sconfigs/status
   verbs:
   - get
