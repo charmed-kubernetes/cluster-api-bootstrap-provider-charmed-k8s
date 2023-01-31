@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	bootstrapv1 "github.com/charmed-kubernetes/cluster-api-bootstrap-provider-charmed-k8s/api/v1beta1"
 	"github.com/pkg/errors"
@@ -31,6 +32,7 @@ import (
 	bsutil "sigs.k8s.io/cluster-api/bootstrap/util"
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/annotations"
+	"sigs.k8s.io/cluster-api/util/conditions"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -47,6 +49,27 @@ type CharmedK8sConfigReconciler struct {
 //+kubebuilder:rbac:groups=bootstrap.cluster.x-k8s.io,resources=charmedk8sconfigs/finalizers,verbs=update
 //+kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters;clusters/status;machinesets;machines;machines/status;machinepools;machinepools/status,verbs=get;list;watch
 //+kubebuilder:rbac:groups="",resources=secrets;events;configmaps,verbs=get;list;watch;create;update;patch;delete
+
+type JujuCommand struct {
+	Command string
+	Args    interface{}
+}
+
+type JujuDeployArgs struct {
+	Application string
+	Charm       string
+	NumUnits    int
+	Options     map[string]interface{}
+}
+
+type JujuAddRelationArgs struct {
+	Endpoints []string
+}
+
+type JujuAddUnitsArgs struct {
+	Application string
+	Machine     string
+}
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -120,7 +143,7 @@ func (r *CharmedK8sConfigReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			// data secret doesn't exist yet, create it
-			err := r.createDataSecret(ctx, config, cluster)
+			err := r.createDataSecret(ctx, config, configOwner, cluster)
 			if err != nil {
 				log.Error(err, "failed to create data secret")
 				return ctrl.Result{}, err
@@ -150,8 +173,13 @@ func (r *CharmedK8sConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 // create the data secret
-func (r *CharmedK8sConfigReconciler) createDataSecret(ctx context.Context, config *bootstrapv1.CharmedK8sConfig, cluster *clusterv1.Cluster) error {
+func (r *CharmedK8sConfigReconciler) createDataSecret(ctx context.Context, config *bootstrapv1.CharmedK8sConfig, configOwner *bsutil.ConfigOwner, cluster *clusterv1.Cluster) error {
 	log := ctrl.LoggerFrom(ctx)
+
+	bootstrapData, err := r.newBootstrapData(ctx, config, configOwner, cluster)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create bootstrap data")
+	}
 
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -171,7 +199,7 @@ func (r *CharmedK8sConfigReconciler) createDataSecret(ctx context.Context, confi
 			},
 		},
 		Data: map[string][]byte{
-			"value":  []byte(r.generateBootstrapData(ctx)),
+			"value":  []byte(bootstrapData),
 			"format": []byte("juju"),
 		},
 		Type: clusterv1.ClusterSecretType,
@@ -190,10 +218,248 @@ func (r *CharmedK8sConfigReconciler) createDataSecret(ctx context.Context, confi
 	return nil
 }
 
-func (r *CharmedK8sConfigReconciler) generateBootstrapData(ctx context.Context) string {
-	log := ctrl.LoggerFrom(ctx)
-	log.Info("TODO: generate bootstrap data")
-	return "placeholder"
+func (r *CharmedK8sConfigReconciler) newBootstrapData(ctx context.Context, config *bootstrapv1.CharmedK8sConfig, configOwner *bsutil.ConfigOwner, cluster *clusterv1.Cluster) ([]byte, error) {
+	// Note: can't use IsFalse here because we need to handle the absence of the condition as well as false.
+	var commands []JujuCommand
+	if !conditions.IsTrue(cluster, clusterv1.ControlPlaneInitializedCondition) {
+		commands = r.newBootstrapCommandsClusterInit()
+	} else if configOwner.IsControlPlaneMachine() {
+		commands = r.newBootstrapCommandsControlPlane()
+	} else {
+		commands = r.newBootstrapCommandsWorker()
+	}
+
+	bootstrapData, err := json.Marshal(commands)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to json encode bootstrap data")
+	}
+
+	return bootstrapData, nil
+}
+
+func (r *CharmedK8sConfigReconciler) newBootstrapCommandsClusterInit() []JujuCommand {
+	// TODO: make this configurable
+	initCommands := []JujuCommand{
+		JujuCommand{
+			Command: "Deploy",
+			Args: JujuDeployArgs{
+				Application: "calico",
+				Charm:       "calico",
+				Options: map[string]interface{}{
+					"vxlan": "Always",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "Deploy",
+			Args: JujuDeployArgs{
+				Application: "containerd",
+				Charm:       "containerd",
+			},
+		},
+		JujuCommand{
+			Command: "Deploy",
+			Args: JujuDeployArgs{
+				Application: "easyrsa",
+				Charm:       "easyrsa",
+				NumUnits:    0,
+			},
+		},
+		JujuCommand{
+			Command: "Deploy",
+			Args: JujuDeployArgs{
+				Application: "etcd",
+				Charm:       "etcd",
+				NumUnits:    0,
+				Options: map[string]interface{}{
+					"channel": "3.4/stable",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "Deploy",
+			Args: JujuDeployArgs{
+				Application: "kubernetes-control-plane",
+				Charm:       "kubernetes-control-plane",
+				NumUnits:    0,
+				Options: map[string]interface{}{
+					"channel": "1.26/stable",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "Deploy",
+			Args: JujuDeployArgs{
+				Application: "kubernetes-worker",
+				Charm:       "kubernetes-worker",
+				NumUnits:    0,
+				Options: map[string]interface{}{
+					"channel": "1.26/stable",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"kubernetes-control-plane:kube-control",
+					"kubernetes-worker:kube-control",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"kubernetes-control-plane:certificates",
+					"easyrsa:client",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"kubernetes-control-plane:etcd",
+					"etcd:db",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"kubernetes-worker:certificates",
+					"easyrsa:client",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"etcd:certificates",
+					"easyrsa:client",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"calico:etcd",
+					"etcd:db",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"calico:cni",
+					"kubernetes-control-plane:cni",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"calico:cni",
+					"kubernetes-worker:cni",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"containerd:containerd",
+					"kubernetes-worker:container-runtime",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"containerd:containerd",
+					"kubernetes-control-plane:container-runtime",
+				},
+			},
+		},
+		// NOTE: kubeapi-load-balancer is implicitly created by the juju infra
+		// provider, so we can relate to it even though we haven't defined the app
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"kubernetes-control-plane:loadbalancer-external",
+					"kubeapi-load-balancer:lb-consumers",
+				},
+			},
+		},
+		JujuCommand{
+			Command: "AddRelation",
+			Args: JujuAddRelationArgs{
+				Endpoints: []string{
+					"kubernetes-control-plane:loadbalancer-internal",
+					"kubeapi-load-balancer:lb-consumers",
+				},
+			},
+		},
+	}
+
+	// Don't forget the commands to add units to this machine, too.
+	controlPlaneCommands := r.newBootstrapCommandsControlPlane()
+	commands := append(initCommands, controlPlaneCommands...)
+	return commands
+}
+
+func (r *CharmedK8sConfigReconciler) newBootstrapCommandsControlPlane() []JujuCommand {
+	// TODO: make this configurable
+	// TODO: can we fill in $machine_id ?
+	commands := []JujuCommand{
+		JujuCommand{
+			Command: "AddUnits",
+			Args: JujuAddUnitsArgs{
+				Application: "easyrsa",
+				Machine:     "$machine_id",
+			},
+		},
+		JujuCommand{
+			Command: "AddUnits",
+			Args: JujuAddUnitsArgs{
+				Application: "etcd",
+				Machine:     "$machine_id",
+			},
+		},
+		JujuCommand{
+			Command: "AddUnits",
+			Args: JujuAddUnitsArgs{
+				Application: "kubernetes-control-plane",
+				Machine:     "$machine_id",
+			},
+		},
+	}
+
+	return commands
+}
+
+func (r *CharmedK8sConfigReconciler) newBootstrapCommandsWorker() []JujuCommand {
+	// TODO: make this configurable
+	// TODO: can we fill in $machine_id ?
+	commands := []JujuCommand{
+		JujuCommand{
+			Command: "AddUnits",
+			Args: JujuAddUnitsArgs{
+				Application: "kubernetes-worker",
+				Machine:     "$machine_id",
+			},
+		},
+	}
+
+	return commands
 }
 
 // get the data secret name that should go with this CharmedK8sConfig
