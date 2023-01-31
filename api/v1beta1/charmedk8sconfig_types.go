@@ -28,8 +28,10 @@ type CharmedK8sConfigSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of CharmedK8sConfig. Edit charmedk8sconfig_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// List of Juju applications to deploy to control plane machines
+	ControlPlaneApplications []string `json:"controlPlaneApplications,omitempty"`
+	// List of Juju applications to deploy to worker machines
+	WorkerApplications []string `json:"workerApplications,omitempty"`
 }
 
 // CharmedK8sConfigStatus defines the observed state of CharmedK8sConfig
@@ -38,10 +40,12 @@ type CharmedK8sConfigStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Required fields for bootstrap providers
+
 	Ready          bool   `json:"ready,omitempty"`
 	DataSecretName string `json:"dataSecretName,omitempty"`
 
 	// Optional fields for bootstrap providers
+
 	FailureReason  string `json:"failureReason,omitempty"`  // error string for programs
 	FailureMessage string `json:"failureMessage,omitempty"` // error string for humans
 }
