@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	bootstrapv1 "github.com/charmed-kubernetes/cluster-api-bootstrap-provider-charmed-k8s/api/v1beta1"
 	"github.com/pkg/errors"
@@ -120,7 +121,7 @@ func (r *CharmedK8sConfigReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			// data secret doesn't exist yet, create it
-			err := r.createDataSecret(ctx, config, cluster)
+			err := r.createDataSecret(ctx, config, configOwner, cluster)
 			if err != nil {
 				log.Error(err, "failed to create data secret")
 				return ctrl.Result{}, err
@@ -150,8 +151,13 @@ func (r *CharmedK8sConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 // create the data secret
-func (r *CharmedK8sConfigReconciler) createDataSecret(ctx context.Context, config *bootstrapv1.CharmedK8sConfig, cluster *clusterv1.Cluster) error {
+func (r *CharmedK8sConfigReconciler) createDataSecret(ctx context.Context, config *bootstrapv1.CharmedK8sConfig, configOwner *bsutil.ConfigOwner, cluster *clusterv1.Cluster) error {
 	log := ctrl.LoggerFrom(ctx)
+
+	bootstrapData, err := r.newBootstrapData(config, configOwner)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create bootstrap data")
+	}
 
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -171,7 +177,7 @@ func (r *CharmedK8sConfigReconciler) createDataSecret(ctx context.Context, confi
 			},
 		},
 		Data: map[string][]byte{
-			"value":  []byte(r.generateBootstrapData(ctx)),
+			"value":  []byte(bootstrapData),
 			"format": []byte("juju"),
 		},
 		Type: clusterv1.ClusterSecretType,
@@ -190,10 +196,21 @@ func (r *CharmedK8sConfigReconciler) createDataSecret(ctx context.Context, confi
 	return nil
 }
 
-func (r *CharmedK8sConfigReconciler) generateBootstrapData(ctx context.Context) string {
-	log := ctrl.LoggerFrom(ctx)
-	log.Info("TODO: generate bootstrap data")
-	return "placeholder"
+func (r *CharmedK8sConfigReconciler) newBootstrapData(config *bootstrapv1.CharmedK8sConfig, configOwner *bsutil.ConfigOwner) ([]byte, error) {
+	var applications []string
+
+	if configOwner.IsControlPlaneMachine() {
+		applications = config.Spec.ControlPlaneApplications
+	} else {
+		applications = config.Spec.WorkerApplications
+	}
+
+	bootstrapData, err := json.Marshal(applications)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to json encode bootstrap data")
+	}
+
+	return bootstrapData, nil
 }
 
 // get the data secret name that should go with this CharmedK8sConfig

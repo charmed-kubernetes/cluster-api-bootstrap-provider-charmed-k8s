@@ -35,10 +35,17 @@ spec:
           spec:
             description: CharmedK8sConfigSpec defines the desired state of CharmedK8sConfig
             properties:
-              foo:
-                description: Foo is an example field of CharmedK8sConfig. Edit charmedk8sconfig_types.go
-                  to remove/update
-                type: string
+              controlPlaneApplications:
+                description: List of Juju applications to deploy to control plane
+                  machines
+                items:
+                  type: string
+                type: array
+              workerApplications:
+                description: List of Juju applications to deploy to worker machines
+                items:
+                  type: string
+                type: array
             type: object
           status:
             description: CharmedK8sConfigStatus defines the observed state of CharmedK8sConfig
@@ -48,10 +55,8 @@ spec:
               failureMessage:
                 type: string
               failureReason:
-                description: Optional fields for bootstrap providers
                 type: string
               ready:
-                description: Required fields for bootstrap providers
                 type: boolean
             type: object
         type: object
