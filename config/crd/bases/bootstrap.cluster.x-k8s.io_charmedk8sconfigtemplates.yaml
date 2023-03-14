@@ -1,0 +1,71 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: charmedk8sconfigtemplates.bootstrap.cluster.x-k8s.io
+spec:
+  group: bootstrap.cluster.x-k8s.io
+  names:
+    categories:
+    - cluster-api
+    kind: CharmedK8sConfigTemplate
+    listKind: CharmedK8sConfigTemplateList
+    plural: charmedk8sconfigtemplates
+    shortNames:
+    - ckct
+    singular: charmedk8sconfigtemplate
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: CharmedK8sConfigTemplate is the Schema for the charmedk8sconfigtemplates
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CharmedK8sConfigTemplateSpec defines the desired state of
+              CharmedK8sConfigTemplate
+            properties:
+              template:
+                properties:
+                  spec:
+                    description: CharmedK8sConfigSpec defines the desired state of
+                      CharmedK8sConfig
+                    properties:
+                      controlPlaneApplications:
+                        description: List of Juju applications to deploy to control
+                          plane machines
+                        items:
+                          type: string
+                        type: array
+                      workerApplications:
+                        description: List of Juju applications to deploy to worker
+                          machines
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                required:
+                - spec
+                type: object
+            required:
+            - template
+            type: object
+        type: object
+    served: true
+    storage: true
