@@ -9,60 +9,25 @@ metadata:
     app.kubernetes.io/created-by: cluster-api-bootstrap-provider-charmed-k8s
   name: charmedk8sconfig-sample
 spec:
-  # TODO(user): Add fields here
-  foo: bar
+  workerApplications:
+    - kubernetes-worker
+  controlPlaneApplications:
+    - kubernetes-control-plane
+    - etcd
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-kind: JujuMachine
-metadata:
-  name: jujumachine-sample
-spec:
-  # TODO(user): Add fields here
-  foo: bar
----
-kind: Machine
-apiVersion: cluster.x-k8s.io/v1beta1
-metadata:
-  name: machine-sample
-  labels:
-    cluster.x-k8s.io/cluster-name: cluster-sample
-    cluster.x-k8s.io/control-plane: "false"
-spec:
-  clusterName: cluster-sample
-  bootstrap:
-    configRef:
-      kind: CharmedK8sConfig
-      apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
-      name: charmedk8sconfig-sample
-  infrastructureRef:
-    kind: JujuMachine
-    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-    name: jujumachine-sample
----
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-kind: JujuCluster
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: CharmedK8sConfigTemplate
 metadata:
   labels:
-    app.kubernetes.io/name: jujucluster
-    app.kubernetes.io/instance: jujucluster-sample
-    app.kubernetes.io/part-of: cluster-api-provider-charmed-k8s
+    app.kubernetes.io/name: charmedk8sconfigtemplate
+    app.kubernetes.io/instance: charmedk8sconfigtemplate-sample
+    app.kubernetes.io/part-of: cluster-api-bootstrap-provider-charmed-k8s
     app.kuberentes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: cluster-api-provider-charmed-k8s
-  name: jujucluster-sample
+    app.kubernetes.io/created-by: cluster-api-bootstrap-provider-charmed-k8s
+  name: charmedk8sconfigtemplate-sample
 spec:
-  # TODO(user): Add fields here
-  foo: bar
----
-apiVersion: cluster.x-k8s.io/v1beta1
-kind: Cluster
-metadata:
-  name: cluster-sample
-spec:
-  clusterNetwork:
-    pods:
-      cidrBlocks: ["192.168.0.0/16"]
-  infrastructureRef:
-    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-    kind: JujuCluster
-    name: jujucluster-sample
+  template:
+    spec:
+      workerApplications:
+        - kubernetes-worker
 ---

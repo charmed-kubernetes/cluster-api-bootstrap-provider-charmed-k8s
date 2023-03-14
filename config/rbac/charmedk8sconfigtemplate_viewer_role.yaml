@@ -1,0 +1,27 @@
+# permissions for end users to view charmedk8sconfigtemplates.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: charmedk8sconfigtemplate-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: cluster-api-bootstrap-provider-charmed-k8s
+    app.kubernetes.io/part-of: cluster-api-bootstrap-provider-charmed-k8s
+    app.kubernetes.io/managed-by: kustomize
+  name: charmedk8sconfigtemplate-viewer-role
+rules:
+- apiGroups:
+  - bootstrap.cluster.x-k8s.io
+  resources:
+  - charmedk8sconfigtemplates
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - bootstrap.cluster.x-k8s.io
+  resources:
+  - charmedk8sconfigtemplates/status
+  verbs:
+  - get
