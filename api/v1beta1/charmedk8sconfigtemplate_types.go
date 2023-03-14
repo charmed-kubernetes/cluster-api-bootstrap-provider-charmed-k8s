@@ -32,7 +32,7 @@ type CharmedK8sConfigTemplateSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Template CharmedK8sConfigConfigTemplateResource `json:"template"`
+	Template CharmedK8sConfigTemplateResource `json:"template"`
 }
 
 //+kubebuilder:object:root=true
