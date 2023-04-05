@@ -1,0 +1,22 @@
+name: Inclusive Naming, Linting and Unit Tests
+on: [pull_request]
+
+jobs:
+  call-inclusive-naming-check:
+    name: Inclusive Naming
+    uses: canonical-web-and-design/Inclusive-naming/.github/workflows/woke.yaml@main
+    with:
+      fail-on-error: "true"
+
+  lint-unit:
+    name: Lint Unit
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+    - name: Setup go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.19'
+    - name: Run fmt, vet, test
+      run: make test
