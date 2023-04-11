@@ -8,4 +8,4 @@ sudo snap install microk8s --classic
 sudo snap install go --channel 1.19/stable --classic
 sudo snap install kubectl --classic
 sudo microk8s enable registry
-sudo usermod -aG microk8s ubuntu
+sudo usermod -aG microk8s "$USER"
