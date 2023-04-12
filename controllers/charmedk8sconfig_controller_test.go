@@ -124,7 +124,7 @@ var _ = Describe("CharmedK8sConfig", func() {
 				// This is a real cluster, so the secret should get garbage collected
 				Eventually(func() bool {
 					lookupKey := types.NamespacedName{Name: "test-charmedk8sconfig", Namespace: "default"}
-					err := k8sClient.Get(ctx, lookupKey, charmedK8sConfig)
+					err := k8sClient.Get(ctx, lookupKey, secret)
 					return apierrors.IsNotFound(err)
 				}, timeout, interval).Should(BeTrue())
 			} else {
