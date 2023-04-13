@@ -120,10 +120,18 @@ var _ = Describe("CharmedK8sConfig", func() {
 				return apierrors.IsNotFound(err)
 			}, timeout, interval).Should(BeTrue())
 
-			// In a real cluster, the secret would be garbage collected because it has
-			// an OwnerReference to the CharmedK8sConfig. Garbage collection doesn't
-			// happen in this test environment. We have to clean it up manually.
-			Expect(k8sClient.Delete(ctx, secret)).Should(Succeed())
+			if useExistingCluster {
+				// This is a real cluster, so the secret should get garbage collected
+				Eventually(func() bool {
+					lookupKey := types.NamespacedName{Name: "test-charmedk8sconfig", Namespace: "default"}
+					err := k8sClient.Get(ctx, lookupKey, secret)
+					return apierrors.IsNotFound(err)
+				}, timeout, interval).Should(BeTrue())
+			} else {
+				// Not a real cluster, so there is no garbage collection for orphaned
+				// secrets. Delete it.
+				Expect(k8sClient.Delete(ctx, secret)).Should(Succeed())
+			}
 			Expect(k8sClient.Delete(ctx, machine)).Should(Succeed())
 			Expect(k8sClient.Delete(ctx, cluster)).Should(Succeed())
 		},
